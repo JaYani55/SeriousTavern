@@ -1,0 +1,96 @@
+# This is an example of a Scraper that uses Selenium to scrape job listings from the MBition website, navigating a form field.
+
+def run():
+    import os
+    from selenium import webdriver
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.common.action_chains import ActionChains
+    from selenium.webdriver.support.ui import WebDriverWait # type: ignore
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.common.exceptions import TimeoutException
+    from bs4 import BeautifulSoup
+    import time
+    from datetime import datetime
+    import pandas as pd
+
+    # Initialize the Chrome WebDriver
+    driver = webdriver.Chrome()  # Make sure to have the correct driver path if needed
+    wait = WebDriverWait(driver, 20)
+    driver.get("https://mbition.io/career/")
+
+    # Company specific variables
+    crawl_date = datetime.now().strftime('%d_%m_%Y')
+
+
+    # Scroll to the desired section on the page
+    target_section_xpath = '/html/body/div[1]/div[1]/div/main/div/div/section[4]'
+    target_section = wait.until(EC.visibility_of_element_located((By.XPATH, target_section_xpath)))
+    driver.execute_script("arguments[0].scrollIntoView(true);", target_section)
+    time.sleep(2)
+
+    # Interact with the dropdown to select 'Berlin'
+    dropdown_xpath = '/html/body/div[1]/div[1]/div/main/div/div/section[4]/div[1]/div/div[2]/form/ul/li[4]/div'
+    dropdown_button = wait.until(EC.element_to_be_clickable((By.XPATH, dropdown_xpath)))
+    dropdown_button.click()
+    time.sleep(2)
+
+    # Use ActionChains to send keyboard actions for selecting 'Berlin'
+    action = ActionChains(driver)
+    action.send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+    time.sleep(5)
+
+    # Wait and click the 'Apply' button after selecting 'Berlin'
+    apply_button_xpath = '/html/body/div[1]/div[1]/div/main/div/div/section[4]/div[1]/div/div[2]/form/ul/li[1]/div/div/span'
+    apply_button = wait.until(EC.element_to_be_clickable((By.XPATH, apply_button_xpath)))
+    apply_button.click()
+    time.sleep(5)
+
+    # Wait and click the 'show all vacancies button'
+    apply_button_xpath = '/html/body/div[1]/div[1]/div/main/div/div/section[4]/div[1]/div/div[4]/a'
+    apply_button = wait.until(EC.element_to_be_clickable((By.XPATH, apply_button_xpath)))
+    apply_button.click()
+    time.sleep(5)
+
+    job_listings_xpath = '/html/body/div[1]/div[1]/div/main/div/div/section[4]/div[1]/div/div[3]/ul'
+    job_listings_html = wait.until(EC.visibility_of_element_located((By.XPATH, job_listings_xpath))).get_attribute('outerHTML')
+#Parse the HTML using BeautifulSoup
+    soup = BeautifulSoup(job_listings_html, 'html.parser') # type: ignore
+
+    data = []
+    job_listings = soup.find_all('li', {'class': 'to-be-added just-added'})
+    for job in job_listings:
+        job_title = job.find('div', {'class': 'job-name'}).text.strip() if job.find('div', {'class': 'job-name'}) else None
+        job_meta = job.find('div', {'class': 'job-meta'}).text.strip().split('•')
+        level = job_meta[0].strip() if len(job_meta) > 0 else None
+        department = job_meta[1].strip() if len(job_meta) > 1 else None
+        schedule = job_meta[2].strip() if len(job_meta) > 2 else None
+        location = job_meta[3].strip() if len(job_meta) > 3 else None
+        URL = job.find('a')['href'] if job.find('a') else None
+        crawl_date = datetime.now().strftime('%d_%m_%Y')
+        employer = 'MBition'
+        description = 'Description'
+        
+        data.append([job_title, location, URL, employer, level, schedule, crawl_date, department, description])
+# Convert the job data into a DataFrame
+    df = pd.DataFrame(data, columns=['job_title', 'location', 'URL', 'employer', 'level', 'schedule', 'crawl_date', 'department', 'description'])
+
+    # Check if the file exists and overwrite it
+    # Define the file path
+    file_path = os.path.join('Data', 'Crawlers', 'DFCache', 'CrawlerOutput', 'MBition.csv')
+
+    # Write the DataFrame to the CSV file, overwriting it if it already exists
+    df.to_csv(file_path, index=False)
+
+    print(df)
+    return df
+
+
+    # Close the WebDriver
+    driver.quit()
+
+if __name__ == "__main__":
+    run()
+
+# Working. Browser automation works a bit sussy though, quick fix with waits but it's very particular. Also the dataframe is not standardized, but that's a problem for another day. 
+#Also headless webdriver? Wasn't working, might need to convert the scripts to use headless when they're all working or i might just leave it as is.
