@@ -2,7 +2,7 @@
     "firstRun": false,
     "currentVersion": "1.12.0",
     "username": "User",
-    "active_character": "default_Seraphina.png",
+    "active_character": "Selene the Scraper_1.png",
     "api_server": "http://127.0.0.1:5000/api",
     "preset_settings": "RecoveredRuins",
     "user_avatar": "user-default.png",
@@ -670,11 +670,11 @@
         "repetition_penalty_frequency": 0,
         "repetition_penalty_presence": 0.005,
         "tail_free_sampling": 0.975,
-        "top_k": 10,
-        "top_p": 0.75,
-        "top_a": 0.08,
-        "typical_p": 0.975,
-        "min_length": 1,
+        "top_k": "10",
+        "top_p": "0.750",
+        "top_a": "0.080",
+        "typical_p": "0.975",
+        "min_length": "1",
         "model_novel": "clio-v1",
         "preset_settings_novel": "Talker-Chat-Clio",
         "streaming_novel": true,
@@ -689,7 +689,10 @@
             3,
             4
         ],
-        "logit_bias": []
+        "logit_bias": [],
+        "cfg_scale": "2.00",
+        "mirostat_lr": "0.50",
+        "mirostat_tau": "3.00"
     },
     "kai_settings": {
         "temp": 1,
@@ -994,14 +997,14 @@
         "bypass_status_check": false,
         "continue_prefill": false,
         "names_behavior": 0,
-        "continue_postfix": " ",
+        "continue_postfix": "\n\n",
         "custom_prompt_post_processing": "",
         "seed": -1,
         "n": 1
     },
     "background": {
-        "name": "japan path cherry blossom.jpg",
-        "url": "url(\"backgrounds/japan path cherry blossom.jpg\")"
+        "name": "__transparent.png",
+        "url": "url(\"backgrounds/__transparent.png\")"
     },
     "proxies": [
         {
